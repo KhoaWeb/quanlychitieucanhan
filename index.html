@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quản lý chi tiêu</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            background-color: #4CAF50;
+            color: white;
+            margin: 0;
+            padding: 20px;
+        }
+
+        #balance {
+            font-weight: bold;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Quản lý chi tiêu</h1>
+    <p>Tổng số tiền đã nhập: <span id="total">0</span> VND</p>
+    <p>Số dư hiện tại: <span id="balance">0</span> VND</p>
+    <p>Nhập số tiền: <input type="number" id="amount"></p>
+    <button onclick="addMoney()">Thêm tiền</button>
+    <button onclick="spendMoney()">Chi tiêu</button>
+    <p id="message"></p>
+
+    <h2>Chi tiêu</h2>
+    <table id="spendingTable">
+        <tr>
+            <th>Nội dung</th>
+            <th>Số tiền</th>
+            <th>Xóa</th>
+        </tr>
+    </table>
+    <p>Nội dung:
+        <select id="spendingContent">
+            <option value=""></option>
+            <option value="Tiền nhà">Tiền nhà</option>
+            <option value="Tiền điện">Tiền điện</option>
+            <option value="Tiền nước">Tiền nước</option>
+            <option value="Tiền xăng">Tiền xăng</option>
+            <option value="Tiền đi chợ">Tiền đi chợ</option>
+            <option value="Tiền cafe">Tiền cafe</option>
+	</select>  <input type="text" id="newSpendingContent">
+  
+     <p>Số tiền: <input type="number" id="spendingAmount"></p>
+    <button onclick="addSpending()">Thêm chi tiêu</button> 
+</p>
+    
+
+    <script>
+        let balance = 0;
+        let total = 0;
+
+        function addMoney() {
+            let amount = document.getElementById("amount").value;
+            balance += parseInt(amount);
+            total += parseInt(amount);
+            document.getElementById("balance").innerHTML = balance;
+            document.getElementById("total").innerHTML = total;
+            document.getElementById("message").innerHTML = "";
+            saveData();
+        }
+
+        function spendMoney() {
+            let amount = document.getElementById("amount").value;
+            if (balance - amount < 0) {
+                document.getElementById("message").innerHTML = "CÁI TÊN NGHÈO NÀY. HẾT TIỀN RỒI NẠP THÊM ĐI ";
+            } else {
+                balance -= parseInt(amount);
+                document.getElementById("balance").innerHTML = balance;
+                document.getElementById("message").innerHTML = "";
+                saveData();
+            }
+        }
+
+        function addSpending() {
+            let content = document.getElementById("spendingContent").value;
+            if (content === "") {
+                content = document.getElementById("newSpendingContent").value;
+            }
+            let amount = document.getElementById("spendingAmount").value;
+            if (balance - amount < 0) {
+                document.getElementById("message").innerHTML = "CÁI TÊN NGHÈO NÀY. HẾT TIỀN RỒI NẠP THÊM ĐI.";
+            } else {
+                balance -= parseInt(amount);
+                document.getElementById("balance").innerHTML = balance;
+                document.getElementById("message").innerHTML = "";
+                let table = document.getElementById("spendingTable");
+                let row = table.insertRow(-1);
+                let cell1 = row.insertCell(0);
+                let cell2 = row.insertCell(1);
+                let cell3 = row.insertCell(2);
+                cell1.innerHTML = content;
+                cell2.innerHTML = amount + " VND";
+                cell3.innerHTML = "<button onclick='deleteRow(this)'>Xóa</button>";
+                saveData();
+            }
+        }
+
+        function deleteRow(btn) {
+            let row = btn.parentNode.parentNode;
+            row.parentNode.removeChild(row);
+            let amount = parseInt(row.cells[1].innerHTML);
+            balance += amount;
+            document.getElementById("balance").innerHTML = balance;
+            saveData();
+        }
+
+        function exportReport() {
+	function exportReport() {
+            let report = "Báo cáo chi tiêu\n\n";
+            report += "Tổng số tiền đã nhập: " + total + " VND\n";
+            report += "Số dư hiện tại: " + balance + " VND\n\n";
+            report += "Chi tiêu:\n";
+            let table = document.getElementById("spendingTable");
+            for (let i = 1; i < table.rows.length; i++) {
+                let row = table.rows[i];
+                let content = row.cells[0].innerHTML;
+                let amount = row.cells[1].innerHTML;
+                report += "- " + content + ": " + amount + "\n";
+            }
+            let blob = new Blob([report], {type: "text/plain;charset=utf-8"});
+            saveAs(blob, "Báo cáo chi tiêu.txt");
+        }
+
+        function saveData() {
+            let data = {
+                balance: balance,
+                total: total,
+                spending: []
+            };
+            let table = document.getElementById("spendingTable");
+            for (let i = 1; i < table.rows.length; i++) {
+                let row = table.rows[i];
+                let content = row.cells[0].innerHTML;
+                let amount = row.cells[1].innerHTML;
+                data.spending.push({content: content, amount: amount});
+            }
+            localStorage.setItem("data", JSON.stringify(data));
+        }
+
+
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+</body>
+</html>
