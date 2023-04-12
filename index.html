@@ -2,6 +2,31 @@
 <html>
 <head>
     <title>Quản lý chi tiêu</title>
+<button id="saveData">Lưu dữ liệu</button>
+<button id="openFile">Mở file</button>
+<input type="file" id="fileInput" style="display: none;">
+
+<script>
+    document.getElementById("saveData").onclick = function() {
+        let pageContent = "<html>" + document.documentElement.innerHTML + "</html>";
+        let blob = new Blob([pageContent], {type: "text/html;charset=utf-8"});
+        saveAs(blob, "page.html");
+    }
+
+    document.getElementById("openFile").onclick = function() {
+        document.getElementById("fileInput").click();
+    }
+
+    document.getElementById("fileInput").onchange = function() {
+        let file = this.files[0];
+        let reader = new FileReader();
+        reader.onload = function(e) {
+            document.documentElement.innerHTML = e.target.result;
+        }
+        reader.readAsText(file);
+    }
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
